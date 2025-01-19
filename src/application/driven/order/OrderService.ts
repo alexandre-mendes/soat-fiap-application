@@ -35,6 +35,7 @@ export class OrderService implements IOrderService {
                 clientName: o.client?.name,
                 status: o.status,
                 createdAt: o.createdAt,
+                waitingTime: o.waitingTime
             } as OutputItem
         });
         const finalized = orders.filter(o => Status.FINALIZED === o.status);

@@ -69,6 +69,28 @@ export class Order {
         return this._number;
     }
 
+    get waitingTime() {
+        const diffMs: number = new Date().getTime() - this._createdAt.getTime();
+
+        // Calcular os componentes de tempo
+        const dias: number = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const horas: number = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutos: number = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const segundos: number = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+        // Inicializar uma lista para armazenar as partes relevantes da string
+        const partes: string[] = [];
+
+        // Adicionar as partes de tempo à lista, apenas se forem maiores que zero
+        if (dias > 0) partes.push(`${dias} dias`);
+        if (horas > 0) partes.push(`${horas} horas`);
+        if (minutos > 0) partes.push(`${minutos} minutos`);
+        if (segundos > 0 || partes.length === 0) partes.push(`${segundos} segundos`); // Garante que "segundos" seja mostrado mesmo que a diferença seja menor que um minuto
+
+        // Retornar a string concatenada
+        return partes.join(', ');
+    }
+
     set number(value: number) {
         this._number = value;
     }
