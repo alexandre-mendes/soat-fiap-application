@@ -1,0 +1,508 @@
+openapi: 3.0.0
+info:
+  title: API de Clientes, Produtos e Pedidos
+  description: API para gerenciar clientes, produtos e pedidos.
+  version: 1.0.0
+  contact:
+    name: Suporte da API
+    url: http://example.com
+    email: suporte@example.com
+servers:
+  - url: http://localhost:3000/
+    description: API local de desenvolvimento
+
+paths:
+  # Categoria: Clientes
+  /clients:
+    post:
+      summary: Cadastrar cliente
+      description: Cria um novo cliente no sistema.
+      tags:
+        - Clientes
+      requestBody:
+        description: Dados do cliente para criação
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - cpf
+                - name
+                - email
+              properties:
+                cpf:
+                  type: string
+                name:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '201':
+          description: Cliente criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  cpf:
+                    type: string
+                  name:
+                    type: string
+                  email:
+                    type: string
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erro interno do servidor
+
+  /clients/{cpf}:
+    get:
+      summary: Buscar cliente por CPF
+      description: Retorna os dados de um cliente pelo CPF.
+      tags:
+        - Clientes
+      parameters:
+        - in: path
+          name: cpf
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  cpf:
+                    type: string
+                  name:
+                    type: string
+                  email:
+                    type: string
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erro interno do servidor
+
+  # Categoria: Produtos
+  /products:
+    post:
+      summary: Cadastrar produto
+      description: Cria um novo produto no sistema.
+      tags:
+        - Produtos
+      requestBody:
+        description: Dados do produto para criação
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - price
+                - category
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                category:
+                  type: string
+                  enum:
+                    - LANCHE
+                    - ACOMPANHAMENTO
+                    - BEBIDA
+                    - SOBREMESA
+      responses:
+        '201':
+          description: Produto criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  price:
+                    type: number
+                  category:
+                    type: string
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erro interno do servidor
+
+  /products/{id}:
+    put:
+      summary: Atualizar produto
+      description: Atualiza as informações de um produto pelo ID.
+      tags:
+        - Produtos
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Dados do produto para atualização
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - price
+                - category
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                category:
+                  type: string
+                  enum:
+                    - LANCHE
+                    - ACOMPANHAMENTO
+                    - BEBIDA
+                    - SOBREMESA
+      responses:
+        '200':
+          description: Produto atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  price:
+                    type: number
+                  category:
+                    type: string
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erro interno do servidor
+
+    delete:
+      summary: Remove produto
+      description: Remove um produto do sistema pelo ID.
+      tags:
+        - Produtos
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Produto removido com sucesso
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erro interno do servidor
+
+  /products/category/{category}:
+    get:
+      summary: Listar produtos por categoria
+      description: Retorna a lista de produtos de uma categoria específica.
+      tags:
+        - Produtos
+      parameters:
+        - in: path
+          name: category
+          required: true
+          schema:
+            type: string
+            enum:
+              - LANCHE
+              - ACOMPANHAMENTO
+              - BEBIDA
+              - SOBREMESA
+      responses:
+        '200':
+          description: Produtos encontrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    description:
+                      type: string
+                    price:
+                      type: number
+                    category:
+                      type: string
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erro interno do servidor
+
+  # Categoria: Pedidos
+  /orders/checkout:
+    post:
+      summary: Criar pedido
+      description: Cria um novo pedido no sistema.
+      tags:
+        - Pedidos
+      requestBody:
+        description: Dados do pedido para criação
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - clientId
+                - items
+              properties:
+                clientId:
+                  type: string
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - productId
+                      - quantity
+                      - observation
+                    properties:
+                      productId:
+                        type: string
+                      quantity:
+                        type: integer
+                      observation:
+                        type: string
+      responses:
+        '201':
+          description: Pedido criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  number:
+                    type: string
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erro interno do servidor
+  
+  /orders:
+    get:
+      summary: Listar pedidos por status
+      description: Retorna uma lista de pedidos agrupados por status.
+      tags:
+        - Pedidos
+      responses:
+        '200':
+          description: Pedidos listados com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  finalized:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        number:
+                          type: integer
+                        clientName:
+                          type: string
+                        status:
+                          type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+                  ready:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        number:
+                          type: integer
+                        clientName:
+                          type: string
+                        status:
+                          type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+                  inPreparation:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        number:
+                          type: integer
+                        clientName:
+                          type: string
+                        status:
+                          type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+                  received:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        number:
+                          type: integer
+                        clientName:
+                          type: string
+                        status:
+                          type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erro interno do servidor
+  /orders/{id}/progress:
+    put:
+      summary: Atualizar o status do pedido
+      description: Atualiza o status do pedido com base no status atual. O status evolui automaticamente de acordo com o fluxo de progresso do pedido.
+      tags:
+        - Pedidos
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Progresso do pedido atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  number:
+                    type: string
+                  clientName:
+                    type: string
+                  status:
+                    type: string
+                    enum:
+                      - finalized
+                      - ready
+                      - inPreparation
+                      - received
+                  createdAt:
+                    type: string
+                    format: date-time
+        '400':
+          description: Pedido não encontrado ou status inválido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Erro interno do servidor
