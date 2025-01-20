@@ -1,4 +1,4 @@
-FROM node:22.12-alpine AS builder
+FROM node:22-slim AS builder
 
 WORKDIR /app
 
@@ -9,7 +9,7 @@ RUN npm install
 RUN npm run build
 
 #Imagem final
-FROM node:22.12-alpine
+FROM node:22-slim
 
 WORKDIR /app
 
