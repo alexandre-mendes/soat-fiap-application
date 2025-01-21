@@ -1,12 +1,11 @@
 
-import clientController from "./infra/controller/client";
-import { HttpServerConfig } from "./infra/controller/HttpServerConfig";
-import orderController from "./infra/controller/order";
-import productController from "./infra/controller/product";
-import { MongooseConfig } from "./infra/database/mongo/MongooseConfig";
-import httpServer from "./infra/http";
+
 import dotenv from 'dotenv';
+import { MongooseConfig } from './config/MongooseConfig';
+import { HttpServerConfig } from './config/HttpServerConfig';
+import { DiConfig } from './config/DiConfig';
 
 dotenv.config();
+const di = new DiConfig()
 new MongooseConfig().executeScripts();
-new HttpServerConfig(httpServer, clientController, productController, orderController);
+new HttpServerConfig(di);
