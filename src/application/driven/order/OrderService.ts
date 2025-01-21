@@ -1,7 +1,7 @@
 import { Order, OrderItem, Status } from "../../../domain/entity/Order";
 import { DomainError } from "../../../domain/error/DomainError";
 import { IClientRepository } from "../../driver/client/IClientRepository";
-import { IMercadoPagpGataway } from "../../driver/mercadopago/IMercadoPagoGateway";
+import { IMercadoPagpGateway } from "../../driver/mercadopago/IMercadoPagoGateway";
 import { IOrderRepository } from "../../driver/order/IOrderRepository";
 import { IProductRepository } from "../../driver/products/IProductRepository";
 import { Input, IOrderService, Output, OutputItem, OutputList } from "./IOrderService";
@@ -12,7 +12,7 @@ export class OrderService implements IOrderService {
         private orderRepository: IOrderRepository,
         private clientRepository: IClientRepository,
         private productRepository: IProductRepository,
-        private mercadoPagoGateway: IMercadoPagpGataway) {
+        private mercadoPagoGateway: IMercadoPagpGateway) {
     }
 
     async progress(id: string): Promise<Output> {

@@ -1,4 +1,4 @@
-import { MercadoPagoGateway } from "./MercadoPagoGataway";
+import { MercadoPagoGateway } from "./MercadoPagoGateway";
 
 const mercadoPagoGateway = new MercadoPagoGateway();
 

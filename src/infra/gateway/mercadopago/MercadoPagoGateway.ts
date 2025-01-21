@@ -1,6 +1,6 @@
-import { IMercadoPagpGataway } from "../../../application/driver/mercadopago/IMercadoPagoGateway";
+import { IMercadoPagpGateway as IMercadoPagoGateway } from "../../../application/driver/mercadopago/IMercadoPagoGateway";
 
-export class MercadoPagoGateway implements IMercadoPagpGataway {
+export class MercadoPagoGateway implements IMercadoPagoGateway {
 
     public ordersPayments: { id: string, callback: Function }[] = []
 

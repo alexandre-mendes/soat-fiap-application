@@ -1,4 +1,4 @@
 
-export interface IMercadoPagpGataway {
+export interface IMercadoPagpGateway {
     pay(orderId: string, callback: Function): Promise<void>
 }
