@@ -102,21 +102,21 @@ Após os containers estarem em funcionamento, sua aplicação estará disponíve
 
 ## Estrutura de Diretórios
     /src
-      /application          # Osquestradores das regras de negócio e chamadas para drivers através das portas.
-        /driven
-        /driver
-      /domain               # Entidades, value objects e erros do negócio.
-        /entity
-        /error
-        /vo
-      /infra                # Implementações dos drivers e abstração da infraestrutura necessária.
-        /controller
-        /database
-        /gateway
-        /http
-        /repositories
-      app.ts                # Main da aplicação
-    /test                   # Testes do dominio
-    /package.json           # Dependências do projeto e scripts
-    /Dockerfile             # Dockerfile para construir a imagem
-    /docker-compose.yaml    # Docker Compose para orquestrar os contêineres
+    │
+    ├── /core                   # Núcleo da aplicação
+    │   ├── /model              # Entidades e regras de negócio
+    │   ├── /service            # Casos de uso (lógica de aplicação)
+    │   └── /port               # Portas (interfaces) que definem como a aplicação interage
+    │
+    ├── /adapter                # Adaptadores (implementações específicas de entrada e saída)
+    │   ├── /inbound            # Adaptadores de entrada
+    │   │   ├── /controller     
+    │   │   └── /http           
+    │   │
+    │   ├── /outbound           # Adaptadores de saída
+    │   │   ├── /database       
+    │   │   ├── /gateway  
+    |   |   └── /repositories
+    │   │
+    └── /config                 # Arquivos de configuração e inicialização do sistema
+
