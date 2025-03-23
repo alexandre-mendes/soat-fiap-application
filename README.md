@@ -128,6 +128,8 @@ Após os pods estarem em funcionamento, sua aplicação estará disponível na p
     http://localhost:30300
 
 ## Estrutura de Diretórios
+
+```
 /src
     ├── /frameworks-and-drivers   # Implementações específicas de frameworks e drivers
     │   ├── /config               # Arquivos de configuração (banco, controllers, etc.)
@@ -146,4 +148,3 @@ Após os pods estarem em funcionamento, sua aplicação estará disponível na p
     ├── /entities                 # Entidades do domínio (modelos principais e regras de negócio)
     │   ├── /vo                   # Objetos de valor (Value Objects, para representar dados imutáveis)
     │   └── /error                # Erros específicos do domínio
-
