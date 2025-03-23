@@ -129,7 +129,6 @@ Após os pods estarem em funcionamento, sua aplicação estará disponível na p
 
 ## Estrutura de Diretórios
 /src
-    │
     ├── /frameworks-and-drivers   # Implementações específicas de frameworks e drivers
     │   ├── /config               # Arquivos de configuração (banco, controllers, etc.)
     │   ├── /database             # Implementação do banco de dados (ORM, migrations, etc.)
@@ -142,13 +141,9 @@ Após os pods estarem em funcionamento, sua aplicação estará disponível na p
     │
     ├── /use-cases                # Casos de uso (lógica de aplicação)
     │   ├── /input                # Entradas (dados que chegam para acionar o caso de uso)
-    │   └── /output               # Saídas (dados externos ao caso de uso, que ele necessita para executar sua logica)
+    │   └── /output               # Saídas (dados externos ao caso de uso, que ele necessita para executar sua lógica)
     │
     ├── /entities                 # Entidades do domínio (modelos principais e regras de negócio)
     │   ├── /vo                   # Objetos de valor (Value Objects, para representar dados imutáveis)
     │   └── /error                # Erros específicos do domínio
-
-
-
-    https://excalidraw.com/#json=utgG15Efuo1RpuFzgAMGA,hpTYsMvDn-Nbz0mK1fy5Lw
 
