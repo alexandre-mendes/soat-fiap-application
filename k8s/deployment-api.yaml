@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastfood-api
+  labels:
+    app: fastfood-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastfood-api
+  template:
+    metadata:
+      labels:
+        app: fastfood-api
+    spec:
+      containers:
+        - name: fastfood-api
+          image: software-architecture-fiap-fastfood:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 30300
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: fastfood-configmap
+                  key: host
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: fastfood-configmap
+                  key: port
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: fastfood-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fastfood-secret
+                  key: password
+          resources:
+            requests:
+              memory: "62Mi"
+              cpu: "250m"
+            limits:
+              memory: "124Mi"
+              cpu: "500m"

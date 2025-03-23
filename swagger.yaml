@@ -3,11 +3,10 @@ info:
   title: API de Clientes, Produtos e Pedidos
   description: API para gerenciar clientes, produtos e pedidos.
   version: 1.0.0
-  contact:
-    name: Suporte da API
-    url: http://example.com
-    email: suporte@example.com
+
 servers:
+  - url: http://localhost:30300/
+    description: API K8S
   - url: http://localhost:3000/
     description: API local de desenvolvimento
 
@@ -369,7 +368,7 @@ paths:
                     type: string
         '500':
           description: Erro interno do servidor
-  
+
   /orders:
     get:
       summary: Listar pedidos por status
@@ -459,6 +458,7 @@ paths:
                     type: string
         '500':
           description: Erro interno do servidor
+
   /orders/{id}/progress:
     put:
       summary: Atualizar o status do pedido
@@ -504,5 +504,42 @@ paths:
                 properties:
                   message:
                     type: string
+        '500':
+          description: Erro interno do servidor
+
+  # Novo endpoint para pagamento de pedido
+  /orders/{id}/payment:
+    put:
+      summary: Atualizar o status de pagamento de um pedido
+      description: Este endpoint é usado para aprovar ou reprovar o pagamento de um pedido via web hook.
+      tags:
+        - Pedidos
+      operationId: approveRejectPayment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID do pedido
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approved:
+                  type: boolean
+                  description: Status de aprovação do pagamento (true para aprovado, false para reprovado)
+              required:
+                - approved
+      responses:
+        '200':
+          description: Pagamento atualizado com sucesso
+        '400':
+          description: Requisição inválida
+        '404':
+          description: Pedido não encontrado
         '500':
           description: Erro interno do servidor

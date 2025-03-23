@@ -46,7 +46,8 @@ A API oferece endpoints para a manipulação dos dados. Você pode consultar a d
 
 - **Node.js** (versão 22.12.0 ou superior)
 - **Docker** (para rodar no contêiner)
-- **Docker Compose** (para orquestrar os contêineres)
+- **Docker Compose** 
+- **Kubernates (Minikube)** (para orquestrar os contêineres)
 
 ### Passos para rodar o projeto localmente
 
@@ -100,23 +101,54 @@ Após os containers estarem em funcionamento, sua aplicação estará disponíve
     ```bash
     http://localhost:3000
 
+## Rodando o Projeto com Kubernates
+
+### Pré-requisitos
+
+- **Docker** e **Minikube** instalados no seu computador.
+
+## Passos para rodar o projeto com Kubernates:
+
+1. **Construindo e rodando os containers**
+Na raiz do seu projeto (onde o Dockerfile está localizado), execute o seguinte comando:
+    ```bash
+    docker build -t software-architecture-fiap-fastfood:latest .
+
+Esse comando irá construir a imagem do Docker definida no `Dockerfile`.
+
+Após gerar a imagem, ainda na raiz do projeto, execute o seguinte comando:
+    ```bash
+    kubectl apply -f .\k8s\
+
+Esse comando irá construir todo o ambiente necessário para utilização da aplicação via Kubernates, incluindo deployments, services, pv, pvc, configmap, secrets e hpa.
+
+2. **Acessando a aplicação**
+Após os pods estarem em funcionamento, sua aplicação estará disponível na porta configurada (por padrão, 30300). Para acessar a API, você pode usar:
+    ```bash
+    http://localhost:30300
+
 ## Estrutura de Diretórios
-    /src
+/src
     │
-    ├── /core                   # Núcleo da aplicação
-    │   ├── /model              # Entidades e regras de negócio
-    │   ├── /service            # Casos de uso (lógica de aplicação)
-    │   └── /port               # Portas (interfaces) que definem como a aplicação interage
+    ├── /frameworks-and-drivers   # Implementações específicas de frameworks e drivers
+    │   ├── /config               # Arquivos de configuração (banco, controllers, etc.)
+    │   ├── /database             # Implementação do banco de dados (ORM, migrations, etc.)
+    │   └── /http                 # Implementações HTTP (servidores, rotas, middlewares)
     │
-    ├── /adapter                # Adaptadores (implementações específicas de entrada e saída)
-    │   ├── /inbound            # Adaptadores de entrada
-    │   │   ├── /controller     
-    │   │   └── /http           
-    │   │
-    │   ├── /outbound           # Adaptadores de saída
-    │   │   ├── /database       
-    │   │   ├── /gateway  
-    |   |   └── /repositories
-    │   │
-    └── /config                 # Arquivos de configuração e inicialização do sistema
+    ├── /interface-adapter        # Adaptadores entre a camada de entrada e a lógica de aplicação
+    │   ├── /controller           # Controladores (recebem as requisições e invocam os casos de uso)
+    │   ├── /gateway              # Adaptadores de gateway (conectam a lógica de aplicação a fontes externas)
+    │   └── /repositories         # Repositórios (interagem com o banco ou outros serviços de armazenamento)
+    │
+    ├── /use-cases                # Casos de uso (lógica de aplicação)
+    │   ├── /input                # Entradas (dados que chegam para acionar o caso de uso)
+    │   └── /output               # Saídas (dados externos ao caso de uso, que ele necessita para executar sua logica)
+    │
+    ├── /entities                 # Entidades do domínio (modelos principais e regras de negócio)
+    │   ├── /vo                   # Objetos de valor (Value Objects, para representar dados imutáveis)
+    │   └── /error                # Erros específicos do domínio
+
+
+
+    https://excalidraw.com/#json=utgG15Efuo1RpuFzgAMGA,hpTYsMvDn-Nbz0mK1fy5Lw
 

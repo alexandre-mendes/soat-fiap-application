@@ -1,9 +1,9 @@
 
 
 import dotenv from 'dotenv';
-import { MongooseConfig } from './config/MongooseConfig';
-import { HttpServerConfig } from './config/HttpServerConfig';
-import { DiConfig } from './config/DiConfig';
+import { MongooseConfig } from './frameworks-and-drivers/config/MongooseConfig';
+import { HttpServerConfig } from './frameworks-and-drivers/config/HttpServerConfig';
+import { DiConfig } from './frameworks-and-drivers/config/DiConfig';
 
 dotenv.config();
 const di = new DiConfig()
