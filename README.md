@@ -148,3 +148,22 @@ Após os pods estarem em funcionamento, sua aplicação estará disponível na p
     ├── /entities                 # Entidades do domínio (modelos principais e regras de negócio)
     │   ├── /vo                   # Objetos de valor (Value Objects, para representar dados imutáveis)
     │   └── /error                # Erros específicos do domínio
+
+    /src
+    ├── /frameworks-and-drivers   # Implementações específicas de frameworks e drivers
+    │   ├── /config               # Arquivos de configuração (banco, controllers, etc.)
+    │   ├── /database             # Implementação do banco de dados (ORM, migrations, etc.)
+    │   └── /http                 # Implementações HTTP (servidores, rotas, middlewares)
+    │
+    ├── /interface-adapter        # Adaptadores entre a camada de entrada e a lógica de aplicação
+    │   ├── /controller           # Controladores (recebem as requisições e invocam os casos de uso)
+    │   ├── /gateway              # Adaptadores de gateway (conectam a lógica de aplicação a fontes externas)
+    │   └── /repositories         # Repositórios (interagem com o banco ou outros serviços de armazenamento)
+    │
+    ├── /use-cases                # Casos de uso (lógica de aplicação)
+    │   ├── /input                # Entradas (dados que chegam para acionar o caso de uso)
+    │   └── /output               # Saídas (dados externos ao caso de uso, que ele necessita para executar sua lógica)
+    │
+    ├── /entities                 # Entidades do domínio (modelos principais e regras de negócio)
+    │   ├── /vo                   # Objetos de valor (Value Objects, para representar dados imutáveis)
+    │   └── /error                # Erros específicos do domínio

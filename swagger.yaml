@@ -507,7 +507,6 @@ paths:
         '500':
           description: Erro interno do servidor
 
-  # Novo endpoint para pagamento de pedido
   /orders/{id}/payment:
     put:
       summary: Atualizar o status de pagamento de um pedido
@@ -543,3 +542,39 @@ paths:
           description: Pedido não encontrado
         '500':
           description: Erro interno do servidor
+
+  /orders/{id}/payment-info:
+    get:
+      summary: Consultar status de pagamento de um pedido
+      description: Este endpoint retorna o status de pagamento de um pedido.
+      tags:
+        - Pedidos
+      operationId: getPaymentStatus
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID do pedido
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Status de pagamento do pedido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  number:
+                    type: integer
+                  approved:
+                    type: boolean
+        '400':
+          description: Requisição inválida
+        '404':
+          description: Pedido não encontrado
+        '500':
+          description: Erro interno do servidor
+

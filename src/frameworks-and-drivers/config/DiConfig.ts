@@ -21,6 +21,7 @@ import { ProgressOrderImpl } from "../../use-cases/ProgressOrderImpl";
 import { PaymentOrderUpdateImpl } from "../../use-cases/PaymentOrderUpdateImpl";
 import { MercadoPagoImpl } from "../../interface-adapter/gateway/MercadoPagoImpl";
 import { WebHookMock } from "./WebHookMock";
+import { PaymentInfoImpl } from "../../use-cases/PaymentInfoImpl";
 
 export class DiConfig {
     //Database
@@ -52,6 +53,7 @@ export class DiConfig {
     public findAllOrders = new FindAllOrdersImpl(this.findOrder);
     public progressOrder = new ProgressOrderImpl(this.findOrder, this.saveOrder);
     public paymentOrderUpdate = new PaymentOrderUpdateImpl(this.findOrder, this.saveOrder);
+    public paymentInfo = new PaymentInfoImpl(this.findOrder);
     public checkoutOrder = new CheckoutOrderImpl(this.findClient, this.findProduct, this.saveOrder, new MercadoPagoImpl(new WebHookMock(this.paymentOrderUpdate)));
 
     //HTTP Server
@@ -60,5 +62,5 @@ export class DiConfig {
     //Controller
     public clientController = new ClientController(this.addClient, this.findClientByCpf);
     public productController = new ProductController(this.addProduct, this.updateProduct, this.removeProduct, this.findProductsByCategory);
-    public orderController = new OrderController(this.checkoutOrder, this.findAllOrders, this.progressOrder, this.paymentOrderUpdate);
+    public orderController = new OrderController(this.checkoutOrder, this.findAllOrders, this.progressOrder, this.paymentOrderUpdate, this.paymentInfo);
 }

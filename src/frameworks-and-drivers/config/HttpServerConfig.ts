@@ -20,9 +20,10 @@ export class HttpServerConfig {
         di.httpServer.register('/orders', 'GET', di.orderController.findAll.bind(di.orderController));
         di.httpServer.register('/orders/:id/progress', 'PUT', di.orderController.progress.bind(di.orderController));
         di.httpServer.register('/orders/:id/payment', 'PUT', di.orderController.payment.bind(di.orderController));
+        di.httpServer.register('/orders/:id/payment-info', 'GET', di.orderController.paymentDetail.bind(di.orderController));
 
         //Health
-        di.httpServer.register('/health', 'GET', async (req) => new HttpServerResponse({status: "UP"}, 200));
+        di.httpServer.register('/health', 'GET', async () => new HttpServerResponse({status: "UP"}, 200));
 
         di.httpServer.start();
     }

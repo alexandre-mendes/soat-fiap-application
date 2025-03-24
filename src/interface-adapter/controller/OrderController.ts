@@ -1,6 +1,7 @@
 import { Order } from "../../entities/Order";
 import { CheckoutOrder } from "../../use-cases/input/order/CheckoutOrder";
 import { FindAllOrders } from "../../use-cases/input/order/FindAllOrders";
+import { PaymentInfo, PaymentInfoOutput } from "../../use-cases/input/order/PaymentInfo";
 import { PaymentOrderUpdate } from "../../use-cases/input/order/PaymentOrderUpdate";
 import { ProgressOrder } from "../../use-cases/input/order/ProgressOrder";
 import { HttpServerRequest, HttpServerResponse } from "./http/IHttpServer";
@@ -13,7 +14,8 @@ export class OrderController {
         private checkoutOrder: CheckoutOrder, 
         private findAllOrders: FindAllOrders, 
         private progressOrder: ProgressOrder,
-        private paymentOrderUpdate: PaymentOrderUpdate) { }
+        private paymentOrderUpdate: PaymentOrderUpdate, 
+        private paymentInfo: PaymentInfo) { }
 
     async checkout(req: HttpServerRequest<Input>): Promise<HttpServerResponse<Output>> {
         const order = await this.checkoutOrder.execute(req.body);
@@ -31,17 +33,26 @@ export class OrderController {
     }
 
     async progress(req: HttpServerRequest<null>): Promise<HttpServerResponse<Output>> {
-        const outputList = await this.progressOrder.execute(req.params.id);
-        return new HttpServerResponse(outputList, 200);
+        const order = await this.progressOrder.execute(req.params.id);
+        return new HttpServerResponse(this.parseToOutput(order), 200);
     }
 
     async payment(req: HttpServerRequest<PaymentInput>): Promise<HttpServerResponse<null>> {
-        this.paymentOrderUpdate.execute(req.params.id, req.body.approved);
+        await this.paymentOrderUpdate.execute(req.params.id, req.body.approved);
         return new HttpServerResponse(null, 200);
+    }
+
+    async paymentDetail(req: HttpServerRequest<null>): Promise<HttpServerResponse<PaymentDetailOutput>> {
+        const info = await this.paymentInfo.execute(req.params.id);
+        return new HttpServerResponse(this.parseOutputDetail(info), 200);
     }
 
     private parseToOutput(order: Order): Output {
         return { id: order.id, number: order.number };
+    }
+
+    private parseOutputDetail(info: PaymentInfoOutput) {
+        return { id: info.id, number: info.number, approved: info.approved };
     }
 
     private parseToOutputItem(orders: Order[]): OutputItem[] {
@@ -89,4 +100,10 @@ export interface OutputItem {
     clientName: string,
     status: string,
     createdAt: Date
+}
+
+export interface PaymentDetailOutput {
+    id: string,
+    number: number,
+    approved: boolean
 }
