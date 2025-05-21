@@ -1,0 +1,48 @@
+name: Build and Push Docker Image to Amazon ECR
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: fastfood-api
+
+jobs:
+  build-and-push:
+    name: Build and Push to ECR
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsECRPushRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build -t $ECR_REPOSITORY:latest .
+
+      - name: Tag and Push image to ECR
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          IMAGE_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
+
+          docker tag $ECR_REPOSITORY:latest $IMAGE_URI
+          docker push $IMAGE_URI
+
+      - name: Output image URI
+        run: echo "Image pushed to $IMAGE_URI"
