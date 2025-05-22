@@ -3,6 +3,7 @@ import { HttpServerRequest, HttpServerResponse, IHttpServer } from "../../interf
 import express, { NextFunction, Request, Response } from 'express';
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
+import cors from "cors";
 
 export class ExpressHttpServer implements IHttpServer {
 
@@ -12,6 +13,7 @@ export class ExpressHttpServer implements IHttpServer {
     constructor() {
         const port = process.env.SERVER_PORT || 3000
         this.app = express();
+        this.app.use(cors())
         this.app.use(express.json())
         this.port = port;
     }
@@ -45,7 +47,7 @@ export class ExpressHttpServer implements IHttpServer {
         const swaggerDocument = YAML.load('./swagger.yaml');
 
         // Configurar o Swagger UI para usar o arquivo YAML
-        this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+        this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, { explorer: true }));
 
         this.app.listen(this.port, () => {
             console.log(`Servidor rodando em http://localhost:${this.port}`);

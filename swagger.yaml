@@ -4,12 +4,6 @@ info:
   description: API para gerenciar clientes, produtos e pedidos.
   version: 1.0.0
 
-servers:
-  - url: http://localhost:30300/
-    description: API K8S
-  - url: http://localhost:3000/
-    description: API local de desenvolvimento
-
 paths:
   # Categoria: Clientes
   /clients:
