@@ -38,10 +38,24 @@ jobs:
         run: docker build -t $ECR_REPOSITORY:latest .
 
       - name: Tag and Push image to ECR
+        id: push
         run: |
-          IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
-          docker tag $ECR_REPOSITORY:latest $IMAGE_URI
+          IMAGE_URI=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          docker tag ${{ env.ECR_REPOSITORY }}:latest $IMAGE_URI
           docker push $IMAGE_URI
 
       - name: Output image URI
         run: echo "Image pushed to $IMAGE_URI"
+
+      - name: Setup kubectl
+        run: |
+          aws eks update-kubeconfig --name soat-cluster --region $AWS_REGION
+
+      - name: Renderizar manifest com imagem
+        run: envsubst < k8s/deployment-api.yaml > k8s/deployment-api.rendered.yaml
+        env:
+          IMAGE_URI: ${{ env.IMAGE_URI }}
+
+      - name: Deploy App
+        run: kubectl apply -f k8s/

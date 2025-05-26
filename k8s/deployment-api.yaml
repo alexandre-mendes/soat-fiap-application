@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: fastfood-api
-          image: software-architecture-fiap-fastfood:latest
+          image: ${IMAGE_URI}
           imagePullPolicy: Never
           ports:
             - containerPort: 30300
