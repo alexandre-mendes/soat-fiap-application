@@ -66,3 +66,4 @@ jobs:
         run: |
           kubectl set image deployment/fastfood-api fastfood-api=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
           kubectl rollout status deployment/fastfood-api --timeout=200s || kubectl get pods
+          kubectl get svc fastfood-api
