@@ -16,10 +16,10 @@ spec:
     spec:
       containers:
         - name: fastfood-api
-          image: ${IMAGE_URI}
-          imagePullPolicy: Never
+          image: 590422439565.dkr.ecr.us-east-1.amazonaws.com/fastfood-api:latest
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 30300
+            - containerPort: 3000
           livenessProbe:
             httpGet:
               path: /health

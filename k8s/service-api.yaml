@@ -6,7 +6,7 @@ spec:
   selector:
     app: fastfood-api
   ports:
-    - protocol: TCP
-      port: 3000
-      nodePort: 30300
-  type: NodePort
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  type: LoadBalancer
