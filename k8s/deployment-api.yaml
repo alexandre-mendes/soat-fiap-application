@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: fastfood-api
-          image: 590422439565.dkr.ecr.us-east-1.amazonaws.com/fastfood-api:placeholder
+          image: 590422439565.dkr.ecr.us-east-1.amazonaws.com/fastfood-api:lastest
           imagePullPolicy: Always
           ports:
             - name: http
