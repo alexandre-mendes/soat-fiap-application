@@ -7,5 +7,5 @@ import { DiConfig } from './frameworks-and-drivers/config/DiConfig';
 
 dotenv.config();
 const di = new DiConfig()
-new MongooseConfig().executeScripts();
+new MongooseConfig()//.executeScripts();
 new HttpServerConfig(di);
