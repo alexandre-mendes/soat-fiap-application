@@ -1,4 +1,4 @@
-name: Build and Push Docker Image to Amazon ECR
+name: Build and Deploy to Amazon EKS
 
 on:
   workflow_dispatch:
@@ -10,9 +10,10 @@ env:
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   CLUSTER_NAME: soat-cluster
   ECR_REPOSITORY: fastfood-api
+  IMAGE_TAG: ${{ github.sha }}
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -34,29 +35,31 @@ jobs:
 
       - name: Login ECR
         run: |
-          aws ecr get-login-password \
-          --region ${{ env.AWS_REGION }} | \
+          aws ecr get-login-password --region $AWS_REGION | \
           docker login --username AWS \
-          --password-stdin \
-          ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+          --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
       - name: Build Docker image
-        run: docker build -t $ECR_REPOSITORY:latest .
+        run: |
+          docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
 
       - name: Tag and Push image to ECR
-        id: push
         run: |
-          IMAGE_URI=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
-          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
-          docker tag ${{ env.ECR_REPOSITORY }}:latest $IMAGE_URI
-          docker push $IMAGE_URI
+          IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY
+          docker tag $ECR_REPOSITORY:$IMAGE_TAG $IMAGE_URI:$IMAGE_TAG
+          docker push $IMAGE_URI:$IMAGE_TAG
 
-      - name: Update Kube Config
+      - name: Update Kubeconfig
         run: |
           aws eks update-kubeconfig \
-          --name ${{ env.CLUSTER_NAME }} \
-          --region ${{ env.AWS_REGION }}
-      
-      - name: Kube Apply
+          --name $CLUSTER_NAME \
+          --region $AWS_REGION
+
+      - name: Apply Kubernetes manifests (Service, HPA, etc)
         run: |
-          kubectl apply -f k8s
+          kubectl apply -f k8s/
+
+      - name: Update deployment with new image
+        run: |
+          kubectl set image deployment/fastfood-api fastfood-api=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+          kubectl rollout status deployment/fastfood-api --timeout=60s
