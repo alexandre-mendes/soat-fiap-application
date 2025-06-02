@@ -1,16 +1,14 @@
 version: '3.8'
 
 services:
-  mongo:
-    image: mongo:6.0
-    container_name: mongodb
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    container_name: dynamodb_local
     ports:
-      - "27017:27017"
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -inMemory -sharedDb"
     volumes:
-      - mongo_data:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin
+      - dynamodb_data:/data
 
   fastfood:
     build:
@@ -20,13 +18,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DB_HOST: mongodb
-      DB_PORT: 27017
-      DB_USER: admin
-      DB_PASSWORD: admin
-    depends_on: 
-      - mongo
+      DB_HOST: dynamodb_local
+      DB_PORT: 8000
+    depends_on:
+      - dynamodb-local
 
 volumes:
-  mongo_data:
+  dynamodb_data:
     driver: local

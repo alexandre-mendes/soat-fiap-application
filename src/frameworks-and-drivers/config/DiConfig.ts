@@ -22,12 +22,15 @@ import { PaymentOrderUpdateImpl } from "../../use-cases/PaymentOrderUpdateImpl";
 import { MercadoPagoImpl } from "../../interface-adapter/gateway/MercadoPagoImpl";
 import { WebHookMock } from "./WebHookMock";
 import { PaymentInfoImpl } from "../../use-cases/PaymentInfoImpl";
+import { DynamoDb } from "./DynamoConfig";
 
 export class DiConfig {
+    public dynamo = new DynamoDb();
+
     //Database
-    public clientDatabase = new ClientMongoDatabase();
-    public productDatabase = new ProductMongoDatabase();
-    public orderDatabase = new OrderMongoDatabase();
+    public clientDatabase = new ClientMongoDatabase(this.dynamo);
+    public productDatabase = new ProductMongoDatabase(this.dynamo);
+    public orderDatabase = new OrderMongoDatabase(this.dynamo);
 
     //Repository
     public findClient = new FindClientImpl(this.clientDatabase);

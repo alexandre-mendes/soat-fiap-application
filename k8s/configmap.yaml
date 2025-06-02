@@ -4,5 +4,4 @@ metadata:
   name: fastfood-configmap
   namespace: default
 data:
-  host: mongodb
-  port: "27017"
+  AWS_REGION: us-east-1

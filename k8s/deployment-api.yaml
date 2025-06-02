@@ -36,26 +36,11 @@ spec:
             periodSeconds: 10
             failureThreshold: 3
           env:
-            - name: DB_HOST
+            - name: AWS_REGION
               valueFrom:
                 configMapKeyRef:
                   name: fastfood-configmap
-                  key: host
-            - name: DB_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: fastfood-configmap
-                  key: port
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: fastfood-secret
-                  key: username
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: fastfood-secret
-                  key: password
+                  key: AWS_REGION
           resources:
             requests:
               memory: "62Mi"

@@ -1,7 +1,7 @@
-import mongoose, { Schema } from "mongoose";
-import { DBQuery, Filter, IDatabase } from "../../../interface-adapter/repositories/IDatabase";
+import { DBOperation, DBQuery, Filter, IDatabase } from "../../../interface-adapter/repositories/IDatabase";
+import { DynamoDb } from "../../config/DynamoConfig";
 
-export interface IProduct extends Document {
+export interface IProduct {
     id?: string;
     name: string;
     description: string;
@@ -9,50 +9,69 @@ export interface IProduct extends Document {
     category: string;
 }
 
-const productSchema: Schema<IProduct> = new Schema({
-    name: { type: String, required: true },
-    description: { type: String, required: true },
-    price: { type: Number, required: true },
-    category: { type: String, required: true }
-});
-
-export const Product = mongoose.model<IProduct>('Product', productSchema);
-
 export class ProductMongoDatabase implements IDatabase<IProduct> {
 
+    constructor(private dynamo: DynamoDb) { }
+
     async save(entity: IProduct): Promise<IProduct> {
-        const newProduct = new Product(entity);
-        const saved = await newProduct.save();
-        return saved as IProduct;
+        if (!entity.id)
+            entity.id = crypto.randomUUID();
+
+        await this.dynamo.putItem('product', entity);
+        return entity;
     }
 
     async update(entity: IProduct): Promise<IProduct> {
-        const updated = await Product.findByIdAndUpdate(entity.id, entity, { new: true });
-        return updated as IProduct;
+        return await this.save(entity);
     }
 
     async deleteById(id: string): Promise<void> {
-        if (!mongoose.Types.ObjectId.isValid(id))
-            return;
-        await Product.findByIdAndDelete(id);
+        await this.dynamo.deleteItem('product', { id })
     }
 
     async findById(id: string): Promise<IProduct | null> {
-        if (!mongoose.Types.ObjectId.isValid(id))
-            return null;
-        return await Product.findById(id);
+        return await this.dynamo.getItem('product', { id }) as IProduct;
     }
 
     async findByQuery(query: DBQuery): Promise<IProduct> {
-        const filter = new Filter();
-        query.andCriteria.forEach(criteria => filter.addCriteria(criteria));
-        return await Product.findOne(filter) as IProduct;
+        const results = await this.findAllByQuery(query);
+        return results[0] ?? null;
     }
 
     async findAllByQuery(query: DBQuery): Promise<IProduct[]> {
-        const filter = new Filter();
-        query.andCriteria.forEach(criteria => filter.addCriteria(criteria));
-        return await Product.find(filter).exec() as IProduct[];
+        const expressionParts: string[] = [];
+        const expressionValues: Record<string, any> = {};
+        const expressionNames: Record<string, string> = {};
+
+        query.andCriteria.forEach((criteria, i) => {
+            const valuePlaceholder = `:v${i}`;
+            const keyAlias = `#k${i}`;
+
+            expressionNames[keyAlias] = criteria.key;
+            expressionValues[valuePlaceholder] = criteria.value;
+
+            switch (criteria.operation) {
+                case DBOperation.EQUALS:
+                    expressionParts.push(`${keyAlias} = ${valuePlaceholder}`);
+                    break;
+                case DBOperation.NOT_EQUALS:
+                    expressionParts.push(`${keyAlias} <> ${valuePlaceholder}`);
+                    break;
+                default:
+                    throw new Error(`Operação não suportada: ${criteria.operation}`);
+            }
+        });
+
+        const filterExpression = expressionParts.join(' AND ');
+
+        const result = await this.dynamo.scanByField<IProduct>({
+            tableName: 'product',
+            filterExpression,
+            expressionValues,
+            expressionNames,
+        });
+
+        return result;
     }
 
 }

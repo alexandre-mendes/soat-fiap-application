@@ -1,7 +1,7 @@
-import mongoose, { Schema } from "mongoose";
-import { DBQuery, Filter, IDatabase } from "../../../interface-adapter/repositories/IDatabase";
+import { DBOperation, DBQuery, Filter, IDatabase } from "../../../interface-adapter/repositories/IDatabase";
+import { DynamoDb } from "../../config/DynamoConfig";
 
-export interface IOrder extends Document {
+export interface IOrder {
     id: string | undefined;
     number: number;
     client: { id: string, name: string, email: string, cpf: string } | undefined;
@@ -13,72 +13,72 @@ export interface IOrder extends Document {
     total: number;
     paymentPending: boolean;
     status: string | undefined;
-    createdAt: Date;
+    createdAt: string;
 }
-
-const orderSchema: Schema<IOrder> = new Schema({
-    number: { type: Number, required: true },
-    client: {
-        id: { type: String, required: false },
-        name: { type: String, required: false },
-        email: { type: String, required: false },
-        cpf: { type: String, required: false },
-    },
-    items: [{
-        product: {
-            id: { type: String, required: true },
-            name: { type: String, required: true },
-            description: { type: String, required: true },
-            price: { type: Number, required: true },
-            category: { type: String, required: true },
-        },
-        quantity: { type: Number, required: true },
-        observation: { type: String, required: false },
-    }],
-    total: { type: Number, required: true },
-    paymentPending: { type: Boolean, required: true },
-    status: { type: String, required: false },
-    createdAt: { type: Date, required: false },
-});
-
-const Order = mongoose.model<IOrder>('Order', orderSchema);
 
 export class OrderMongoDatabase implements IDatabase<IOrder> {
 
+    constructor(private dynamo: DynamoDb) { }
+
     async save(entity: IOrder): Promise<IOrder> {
-        const newOrder = new Order(entity);
-        const saved = await newOrder.save();
-        return saved as IOrder;
+        if (!entity.id)
+            entity.id = crypto.randomUUID();
+
+        await this.dynamo.putItem('order', entity);
+        return entity;
     }
 
     async update(entity: IOrder): Promise<IOrder> {
-        const updated = await Order.findByIdAndUpdate(entity.id, entity, { new: true });
-        return updated as IOrder;
+        return await this.save(entity);
     }
 
     async deleteById(id: string): Promise<void> {
-        if (!mongoose.Types.ObjectId.isValid(id))
-            return;
-
-        await Order.findByIdAndDelete(id);
+        await this.dynamo.deleteItem('order', { id })
     }
 
     async findById(id: string): Promise<IOrder | null> {
-        if (!mongoose.Types.ObjectId.isValid(id))
-            return null;
-        return await Order.findById(id);
+        return await this.dynamo.getItem('order', { id }) as IOrder;
     }
 
     async findByQuery(query: DBQuery): Promise<IOrder> {
-        const filter = new Filter();
-        query.andCriteria.forEach(criteria => filter.addCriteria(criteria));
-        return await Order.findOne(filter) as IOrder;
+        const results = await this.findAllByQuery(query);
+        return results[0] ?? null;
     }
 
     async findAllByQuery(query: DBQuery): Promise<IOrder[]> {
-        const filter = new Filter();
-        query.andCriteria.forEach(criteria => filter.addCriteria(criteria));
-        return await Order.find(filter).sort(query.sort).exec() as IOrder[];
+        const expressionParts: string[] = [];
+        const expressionValues: Record<string, any> = {};
+        const expressionNames: Record<string, string> = {};
+
+        query.andCriteria.forEach((criteria, i) => {
+            const valuePlaceholder = `:v${i}`;
+            const keyAlias = `#k${i}`;
+
+            expressionNames[keyAlias] = criteria.key;
+            expressionValues[valuePlaceholder] = criteria.value;
+
+            switch (criteria.operation) {
+                case DBOperation.EQUALS:
+                    expressionParts.push(`${keyAlias} = ${valuePlaceholder}`);
+                    break;
+                case DBOperation.NOT_EQUALS:
+                    expressionParts.push(`${keyAlias} <> ${valuePlaceholder}`);
+                    break;
+                default:
+                    throw new Error(`Operação não suportada: ${criteria.operation}`);
+            }
+        });
+
+        const filterExpression = expressionParts.join(' AND ');
+
+        const result = await this.dynamo.scanByField<IOrder>({
+            tableName: 'order',
+            filterExpression,
+            expressionValues,
+            expressionNames,
+        });
+
+        return result;
     }
 
 }

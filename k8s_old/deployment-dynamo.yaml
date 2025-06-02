@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynamodb-local
+  labels:
+    app: dynamodb-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dynamodb-local
+  template:
+    metadata:
+      labels:
+        app: dynamodb-local
+    spec:
+      containers:
+        - name: dynamodb-local
+          image: amazon/dynamodb-local
+          ports:
+            - containerPort: 8000
+          args:
+            - "-jar"
+            - "DynamoDBLocal.jar"
+            - "-sharedDb"
+            # para persistência remova -inMemory
+            # - "-inMemory"  
+          volumeMounts:
+            - mountPath: /data
+              name: dynamodb-storage
+      volumes:
+        - name: dynamodb-storage
+          persistentVolumeClaim:
+            claimName: dynamodb-pvc

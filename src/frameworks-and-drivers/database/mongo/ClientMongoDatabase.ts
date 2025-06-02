@@ -1,57 +1,76 @@
-import { DBQuery, Filter, IDatabase } from "../../../interface-adapter/repositories/IDatabase";
+import { DBOperation, DBQuery, Filter, IDatabase } from "../../../interface-adapter/repositories/IDatabase";
+import { DynamoDb } from "../../config/DynamoConfig";
 
-import mongoose, { Schema } from 'mongoose';
-
-export interface IClient extends Document {
+export interface IClient {
   id?: string,
   name: string;
   email: string;
   cpf: string;
 }
 
-const clientSchema: Schema<IClient> = new Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  cpf: { type: String, required: true, unique: true },
-});
-
-const Client = mongoose.model<IClient>('Client', clientSchema);
-
 export class ClientMongoDatabase implements IDatabase<IClient> {
 
+  constructor(private dynamo: DynamoDb) { }
+
   async save(entity: IClient): Promise<IClient> {
-    const newClient = new Client(entity);
-    const saved = await newClient.save();
-    return saved as IClient;
+    if (!entity.id)
+      entity.id = crypto.randomUUID();
+
+    await this.dynamo.putItem('client', entity);
+    return entity;
   }
 
   async update(entity: IClient): Promise<IClient> {
-        const updated = await Client.findByIdAndUpdate(entity.id, entity, { new: true });
-        return updated as IClient;
+    return await this.save(entity);
   }
 
   async deleteById(id: string): Promise<void> {
-    if (!mongoose.Types.ObjectId.isValid(id))
-      return;
-
-    await Client.findByIdAndDelete(id);
+    await this.dynamo.deleteItem('client', { id })
   }
 
   async findById(id: string): Promise<IClient | null> {
-    if (!mongoose.Types.ObjectId.isValid(id))
-      return null;
-    return await Client.findById(id);
+    return await this.dynamo.getItem('client', { id }) as IClient;
   }
 
   async findByQuery(query: DBQuery): Promise<IClient> {
-    const filter = new Filter();
-    query.andCriteria.forEach(criteria => filter.addCriteria(criteria));
-    return await Client.findOne(filter) as IClient;
+    const results = await this.findAllByQuery(query);
+    return results[0] ?? null;
   }
 
   async findAllByQuery(query: DBQuery): Promise<IClient[]> {
-    const filter = new Filter();
-    query.andCriteria.forEach(criteria => filter.addCriteria(criteria));
-    return await Client.find(filter).sort(query.sort).exec() as IClient[];
+    const expressionParts: string[] = [];
+    const expressionValues: Record<string, any> = {};
+    const expressionNames: Record<string, string> = {};
+
+    query.andCriteria.forEach((criteria, i) => {
+      const valuePlaceholder = `:v${i}`;
+      const keyAlias = `#k${i}`;
+
+      expressionNames[keyAlias] = criteria.key;
+      expressionValues[valuePlaceholder] = criteria.value;
+
+      switch (criteria.operation) {
+        case DBOperation.EQUALS:
+          expressionParts.push(`${keyAlias} = ${valuePlaceholder}`);
+          break;
+        case DBOperation.NOT_EQUALS:
+          expressionParts.push(`${keyAlias} <> ${valuePlaceholder}`);
+          break;
+        default:
+          throw new Error(`Operação não suportada: ${criteria.operation}`);
+      }
+    });
+
+    const filterExpression = expressionParts.join(' AND ');
+
+    const result = await this.dynamo.scanByField<IClient>({
+      tableName: 'client',
+      filterExpression,
+      expressionValues,
+      expressionNames,
+    });
+
+    return result;
   }
+
 }

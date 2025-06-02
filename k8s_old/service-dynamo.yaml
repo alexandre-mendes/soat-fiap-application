@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongodb
+  name: dynamodb-local
 spec:
   selector:
-    app: mongodb
+    app: dynamodb-local
   ports:
     - protocol: TCP
-      port: 27017
-      nodePort: 30200
+      port: 8000
+      nodePort: 30500
   type: NodePort

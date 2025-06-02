@@ -79,7 +79,7 @@ function parseToDB(entity: Order): IOrder {
         total: entity.total,
         paymentPending: entity.paymentPending,
         status: entity.status,
-        createdAt: entity.createdAt
+        createdAt: entity.createdAt?.toISOString()
     } as IOrder;
 }
 
@@ -99,7 +99,7 @@ function parseToEntity(db: IOrder): Order {
 
     const entity = new Order(client, items);
     entity.id = db.id;
-    entity.createdAt = db.createdAt;
+    entity.createdAt = new Date(db.createdAt);
     entity.status = db.status as Status;
     entity.number = db.number;
     entity.paymentPending = db.paymentPending;

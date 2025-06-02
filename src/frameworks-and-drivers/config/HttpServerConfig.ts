@@ -25,9 +25,6 @@ export class HttpServerConfig {
         //Health
         di.httpServer.register('/health', 'GET', async () => new HttpServerResponse({status: "UP"}, 200));
 
-        //Health
-        di.httpServer.register('/fastfoods/test', 'GET', async () => new HttpServerResponse({status: "UP"}, 200));
-
         di.httpServer.start();
     }
 }
