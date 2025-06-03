@@ -25,7 +25,6 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Ensure ECR repository exists
@@ -57,6 +56,14 @@ jobs:
           aws eks update-kubeconfig \
           --name $CLUSTER_NAME \
           --region $AWS_REGION
+
+      - name: Create Kubernetes Secret with AWS credentials
+        run: |
+          kubectl create secret generic aws-credentials \
+            --from-literal=AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+            --from-literal=AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
 
       - name: Apply Kubernetes manifests (Service, HPA, etc)
         run: |
