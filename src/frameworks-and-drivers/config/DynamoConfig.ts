@@ -28,6 +28,8 @@ export class DynamoDb {
       },
     }
 
+    console.log('CONFIGGG: ', config)
+
     this.ddbClient = new DynamoDBClient(config || {});
     this.client = DynamoDBDocumentClient.from(this.ddbClient);
 
