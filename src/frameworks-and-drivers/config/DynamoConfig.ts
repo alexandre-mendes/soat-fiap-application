@@ -19,14 +19,14 @@ export class DynamoDb {
   private readonly client: DynamoDBDocumentClient;
 
   constructor() {
-    const config: DynamoDBClientConfig = {
+    const config: DynamoDBClientConfig = process.env.LOCAL === 'true' ? {
       region: process.env.AWS_REGION,
       endpoint: process.env.AWS_DYNAMO_ENDPOINT,
       credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
       },
-    };
+    } : { region: process.env.AWS_REGION }
 
     this.ddbClient = new DynamoDBClient(config || {});
     this.client = DynamoDBDocumentClient.from(this.ddbClient);
@@ -62,7 +62,7 @@ export class DynamoDb {
       TableName: params.tableName,
       FilterExpression: params.filterExpression,
       ExpressionAttributeValues: params.expressionValues,
-      ExpressionAttributeNames: params.expressionNames, 
+      ExpressionAttributeNames: params.expressionNames,
     });
 
     const result = await this.client.send(command);
@@ -172,6 +172,6 @@ export class DynamoDb {
       }
       console.log('Produtos inseridos')
     }
-    
+
   }
 }
